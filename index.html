@@ -4,212 +4,221 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>NOCTIS — Phantom Air</title>
-  <meta name="description" content="Phantom Air. A matte black runner with a visible air-cushion core. Engineered from darkness." />
-  <meta name="theme-color" content="#050505" />
-
-  <!-- Fonts: Anton (display) + Inter (body) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-
-  <!-- Warm up the first frame so the canvas paints immediately -->
-  <link rel="preload" as="image" href="frames/v1/frame_0001.webp" media="(min-width: 769px)" />
-  <link rel="preload" as="image" href="frames/mobile/v1/frame_0001.webp" media="(max-width: 768px)" />
-
-  <link rel="stylesheet" href="style.css" />
+  <meta name="description" content="Phantom Air by NOCTIS. Five engineered layers — knit upper, comfort insole, responsive midsole, visible Air Core and grip outsole. Built in layers. Worn as one." />
+  <meta name="theme-color" content="#0B0B0C" />
+  <meta name="color-scheme" content="dark" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <!-- The manifest tells the engine which frames exist; fetch it in parallel with the JS -->
+  <link rel="preload" as="fetch" href="/frames/manifest.json" crossorigin="anonymous" />
 </head>
 <body class="is-loading">
+  <a class="skip-link" href="#specs">Skip the film</a>
 
-  <!-- ───────────── Loader ───────────── -->
-  <div class="loader" id="loader" aria-live="polite">
-    <div class="loader__inner">
-      <span class="loader__brand" data-bind="brand">NOCTIS</span>
-      <span class="loader__bar"><span class="loader__fill" id="loaderFill"></span></span>
-      <span class="loader__pct"><span id="loaderPct">0</span>%</span>
-    </div>
+  <!-- ───────────── Loading intro: line grows → splits like a curtain ───────────── -->
+  <div class="intro" id="intro" role="progressbar" aria-label="Loading" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+    <div class="intro__panel intro__panel--top"></div>
+    <div class="intro__panel intro__panel--bottom"></div>
+    <div class="intro__line"><span class="intro__fill" id="introFill"></span></div>
+    <p class="intro__meta"><span class="intro__brand">NOCTIS</span><span class="intro__pct"><span id="introPct">0</span>%</span></p>
   </div>
 
-  <!-- ───────────── Chrome: cursor, progress, nav, chapters ───────────── -->
-  <div class="cursor" id="cursor" aria-hidden="true"><span class="cursor__dot"></span></div>
-  <div class="progress" aria-hidden="true"><span class="progress__fill" id="progressFill"></span></div>
+  <div class="grain" aria-hidden="true"></div>
 
-  <header class="nav">
-    <a href="#top" class="nav__logo" data-bind="brand" data-cursor>NOCTIS</a>
-    <nav class="nav__links">
-      <a href="#details" data-cursor>Details</a>
-      <a href="#features" data-cursor>Technology</a>
-      <a href="#preorder" class="nav__cta" data-cursor>Pre-order</a>
+  <!-- ───────────── Navigation ───────────── -->
+  <header class="nav" id="nav">
+    <a class="nav__logo" href="#top" aria-label="NOCTIS — back to top" data-bind="brand">NOCTIS</a>
+    <nav class="nav__links" aria-label="Primary">
+      <a href="#build">The Build</a>
+      <a href="#specs">Specs</a>
+      <a href="#reviews">Reviews</a>
     </nav>
+    <button class="nav__cart" type="button" aria-label="Cart, 0 items">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1.2 11.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8L5 8Z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>
+      <span class="nav__cart-count" id="cartCount">0</span>
+    </button>
   </header>
 
-  <ol class="chapters" id="chapters" aria-hidden="true">
-    <li class="chapters__item is-active" data-chapter="1"><span>01</span> Origin</li>
-    <li class="chapters__item" data-chapter="2"><span>02</span> Impact</li>
+  <!-- ───────────── Fixed chrome: progress rail + chapter index ───────────── -->
+  <div class="rail" aria-hidden="true"><span class="rail__fill" id="railFill"></span></div>
+  <ol class="chapters" id="chapters" aria-label="Chapters">
+    <li class="chapters__item is-active" data-chapter="0"><span>01</span> Deconstruct</li>
+    <li class="chapters__item" data-chapter="1"><span>02</span> Rebuild</li>
+    <li class="chapters__item" data-chapter="2"><span>03</span> Ignite</li>
   </ol>
 
   <main id="top">
-
-    <!-- ───────────── Scroll sequence (pinned) ─────────────
-         JS pins .stage and drives the canvas + overlays from one scrubbed timeline.
-         data-static-frame is used only in prefers-reduced-motion mode. -->
-    <section class="sequence" id="sequence">
+    <!-- ───────────── Pinned scroll film ─────────────
+         One stage, one canvas. JS pins .stage and drives every overlay from a
+         single scrubbed timeline. -->
+    <section class="sequence" id="sequence" aria-label="Phantom Air — product film">
       <div class="stage" id="stage">
-        <canvas class="stage__canvas" id="canvas" aria-label="Phantom Air product film" role="img"></canvas>
-        <div class="stage__vignette"></div>
-        <div class="stage__tint" id="tint"></div>
-        <div class="stage__flash" id="flash"></div>
-
-        <!-- Pointer line toward the air-bubble sole (endpoint is projected from image space) -->
-        <svg class="sole-line" id="soleLine" aria-hidden="true">
-          <line id="soleLinePath" x1="0" y1="0" x2="0" y2="0" />
-          <circle id="soleLineDot" r="4" cx="0" cy="0" />
-          <circle id="soleLineRing" r="14" cx="0" cy="0" />
-        </svg>
-
-        <!-- V1 · 0–15% -->
-        <div class="overlay overlay--hero" data-overlay="hero" data-static-frame="1:1">
-          <div class="tilt">
-            <p class="label">Chapter 01 — Origin</p>
-            <h1 class="hero__title" data-bind="product">PHANTOM AIR</h1>
-            <p class="hero__tagline">Engineered from darkness.</p>
-            <p class="hero__hint"><span class="hero__hint-line"></span>Scroll to reveal</p>
+        <div class="stage__media" id="media">
+          <!-- #framing carries the scrubbed reposition (hero → right, card → left).
+               Leader lines + layer labels live inside it so they move with the shoe. -->
+          <div class="stage__framing" id="framing">
+            <canvas class="stage__canvas" id="canvas" role="img"
+              aria-label="Phantom Air sneaker separating into its five layers, rebuilding, then lighting up on a reflective floor."></canvas>
+            <svg class="leaders" id="leaders" aria-hidden="true"></svg>
+            <!-- CH1 · layer labels (content + timings come from CONFIG.parts) -->
+            <ol class="parts" id="build" aria-label="The five layers"></ol>
           </div>
         </div>
+        <div class="stage__spot" id="spot" aria-hidden="true"></div>
+        <div class="stage__vignette" aria-hidden="true"></div>
+        <div class="stage__flash" id="flash" aria-hidden="true"></div>
 
-        <!-- V1 · 35–55% (sole close-up) -->
-        <div class="overlay overlay--sole" data-overlay="sole" data-static-frame="1:100">
-          <div class="tilt">
-            <p class="label">01.2 / Cushioning</p>
-            <h2 class="display">Air Cushion Core</h2>
-            <p class="spec">Pressurised 360° air unit returns <strong>87%</strong> of every stride's energy — soft on landing, explosive on toe-off.</p>
-          </div>
-        </div>
-
-        <!-- V1 · 70–90% -->
-        <div class="overlay overlay--weight" data-overlay="weight" data-static-frame="1:170">
-          <div class="tilt">
-            <p class="label">01.3 / Mass</p>
-            <h2 class="display display--xl">Weightless.<br /><span class="counter"><span id="weightCounter">240</span>g</span></h2>
-            <p class="spec">Men's US 9. Knit upper, carbon-infused heel clip.</p>
-          </div>
-        </div>
-
-        <!-- V2 · 10–25% (stomp) -->
-        <div class="overlay overlay--impact" data-overlay="impact" data-static-frame="2:44">
-          <div class="tilt">
-            <h2 class="impact" id="impactWord">IMPACT</h2>
-          </div>
-        </div>
-
-        <!-- V2 · 40–65% (neon city) -->
-        <div class="overlay overlay--city" data-overlay="city" data-static-frame="2:110">
-          <div class="tilt">
-            <p class="label">Chapter 02 — Impact</p>
-            <h2 class="display neon">Built for the city<br />that never sleeps.</h2>
-          </div>
-        </div>
-
-        <!-- V2 · 80–100% (finale + pre-order) -->
-        <div class="overlay overlay--finale" data-overlay="finale" data-static-frame="2:150" id="preorder">
-          <div class="tilt">
-            <p class="label">Drop 001 — Limited run</p>
-            <h2 class="display" data-bind="product">PHANTOM AIR</h2>
-            <p class="price"><span class="price__currency">$</span><span data-bind="price">220</span></p>
-
-            <div class="swatches" role="radiogroup" aria-label="Colorway">
-              <!-- Colorways come from CONFIG.colorways; JS renders the buttons -->
+        <!-- HERO -->
+        <div class="hero" data-overlay="hero">
+          <div class="hero__inner" id="heroText">
+            <p class="eyebrow reveal-line"><span>New — 2026 Collection</span></p>
+            <h1 class="hero__title">
+              <span class="line"><span>Built in layers.</span></span>
+              <span class="line"><span><em>Worn as one.</em></span></span>
+            </h1>
+            <p class="hero__lede reveal-line"><span>Five engineered layers, one weightless stride. Phantom Air is our lightest runner yet.</span></p>
+            <div class="hero__actions reveal-line">
+              <span>
+                <a class="btn btn--solid magnetic" href="#preorder"><span class="magnetic__inner">Pre-order</span></a>
+                <a class="btn-link magnetic" href="#build"><span class="magnetic__inner">Explore the build <span aria-hidden="true">→</span></span></a>
+              </span>
             </div>
-            <p class="swatch-name" id="swatchName">Obsidian</p>
-
-            <a href="#details" class="cta magnetic" data-cursor="lg" id="cta">
-              <span class="cta__label">Pre-order now</span>
-              <span class="cta__glow" aria-hidden="true"></span>
-            </a>
-            <p class="ships">Ships 11.24 · Free returns</p>
           </div>
         </div>
+
+        <div class="scroll-hint" id="scrollHint" aria-hidden="true">
+          <span>Scroll to deconstruct</span>
+          <span class="scroll-hint__line"></span>
+        </div>
+
+        <!-- CH2 · rebuild statement -->
+        <div class="rebuild" data-overlay="rebuild">
+          <p class="rebuild__statement"><span class="line"><span>Every layer has <em>a purpose.</em></span></span></p>
+          <p class="rebuild__count" aria-live="off"><span class="rebuild__num" id="layerCount">05</span><span class="rebuild__label">Layers</span></p>
+        </div>
+
+        <!-- CH3 · reveal -->
+        <div class="ignite" data-overlay="ignite">
+          <p class="eyebrow">03 — Ignite</p>
+          <h2 class="ignite__title"><span class="line"><span>Light up</span></span><span class="line"><span><em>the night.</em></span></span></h2>
+        </div>
+
+        <aside class="card" id="preorder" data-overlay="card" aria-labelledby="cardTitle">
+          <p class="eyebrow">Drop 001 · Limited run</p>
+          <h2 class="card__title" id="cardTitle" data-bind="product">Phantom Air</h2>
+          <p class="card__price"><span data-bind="currency">$</span><span data-bind="price">220</span></p>
+
+          <fieldset class="card__group">
+            <legend class="eyebrow">Colorway — <span id="colorName">Obsidian</span></legend>
+            <div class="swatches" id="swatches"></div>
+          </fieldset>
+
+          <fieldset class="card__group">
+            <legend class="eyebrow">Size (US)</legend>
+            <div class="sizes" id="sizes"></div>
+          </fieldset>
+
+          <button class="btn btn--solid btn--block magnetic" type="button" id="preorderBtn"><span class="magnetic__inner">Pre-order</span></button>
+          <p class="card__note" id="cardNote" aria-live="polite">Ships November 24 · Free returns</p>
+        </aside>
       </div>
     </section>
 
-    <!-- ───────────── Product details ───────────── -->
-    <section class="details" id="details">
-      <div class="details__media reveal">
-        <img src="frames/v1/frame_0110.webp" alt="Phantom Air side profile showing the visible air-cushion sole" loading="lazy" width="1920" height="1080" />
-        <span class="details__badge">Air Cushion Core — 360°</span>
+    <!-- ───────────── Specs ───────────── -->
+    <section class="specs section" id="specs" aria-labelledby="specsTitle">
+      <div class="specs__intro">
+        <p class="eyebrow fade-in">Specifications</p>
+        <h2 class="display" id="specsTitle"><span class="line"><span>Measured</span></span><span class="line"><span><em>in grams.</em></span></span></h2>
+        <p class="lede fade-in">Every layer was weighed, cut and re-cut until nothing was left that didn't earn its place. What remains is the lightest runner we have ever made.</p>
       </div>
-      <div class="details__copy">
-        <p class="label reveal">Product details</p>
-        <h2 class="display reveal"><span data-bind="product">PHANTOM AIR</span></h2>
-        <p class="lede reveal">A single piece of engineered darkness. Matte knit upper, sculpted TPU cage, and a fully exposed air unit that does the talking.</p>
-        <dl class="specs reveal">
-          <div><dt>Weight</dt><dd>240 g</dd></div>
-          <div><dt>Drop</dt><dd>10 mm</dd></div>
-          <div><dt>Stack</dt><dd>38 / 28 mm</dd></div>
-          <div><dt>Upper</dt><dd>Recycled matte knit</dd></div>
-          <div><dt>Midsole</dt><dd>Visible 360° air unit</dd></div>
-          <div><dt>Outsole</dt><dd>Wet-grip rubber</dd></div>
-        </dl>
-      </div>
+      <dl class="specs__list">
+        <div class="stat fade-in"><dt>Weight</dt><dd class="stat__value"><span class="stat__num" data-count="240">0</span><span class="stat__unit">g</span></dd><dd class="stat__note">Men's US 9</dd></div>
+        <div class="stat fade-in"><dt>Heel-to-toe drop</dt><dd class="stat__value"><span class="stat__num" data-count="10">0</span><span class="stat__unit">mm</span></dd><dd class="stat__note">Neutral, everyday geometry</dd></div>
+        <div class="stat fade-in"><dt>Stack height</dt><dd class="stat__value"><span class="stat__num" data-count="38">0</span><span class="stat__unit">mm</span></dd><dd class="stat__note">Heel · 28 mm forefoot</dd></div>
+        <div class="stat fade-in"><dt>Energy return</dt><dd class="stat__value"><span class="stat__num" data-count="87">0</span><span class="stat__unit">%</span></dd><dd class="stat__note">Air Core, lab-tested</dd></div>
+      </dl>
     </section>
 
-    <!-- ───────────── Feature grid ───────────── -->
-    <section class="features" id="features">
-      <header class="features__head">
-        <p class="label reveal">Technology</p>
-        <h2 class="display reveal">Three things you'll feel first.</h2>
+    <!-- ───────────── Features ───────────── -->
+    <section class="features section" id="technology" aria-labelledby="featuresTitle">
+      <header class="section__head">
+        <p class="eyebrow fade-in">Technology</p>
+        <h2 class="display" id="featuresTitle"><span class="line"><span>Three things you'll</span></span><span class="line"><span><em>feel first.</em></span></span></h2>
       </header>
       <div class="features__grid">
-        <article class="card reveal" data-tilt data-cursor>
-          <span class="card__index">01</span>
-          <div class="card__icon card__icon--cyan" aria-hidden="true">
-            <svg viewBox="0 0 48 48"><ellipse cx="24" cy="30" rx="18" ry="8"/><ellipse cx="24" cy="30" rx="10" ry="4"/><path d="M6 30V22c0-4 8-8 18-8s18 4 18 8v8"/></svg>
-          </div>
-          <h3>Air Cushion Core</h3>
-          <p>A pressurised, fully visible air unit spans heel to toe for 87% energy return.</p>
+        <article class="feature fade-in" data-tilt>
+          <span class="feature__index">01</span>
+          <svg class="feature__icon" viewBox="0 0 48 48" aria-hidden="true"><ellipse cx="24" cy="30" rx="18" ry="7"/><ellipse cx="24" cy="30" rx="9" ry="3.5"/><path d="M6 30v-7c0-4 8-8 18-8s18 4 18 8v7"/></svg>
+          <h3>Air Core</h3>
+          <p>A visible, pressurised air unit runs heel to toe and gives back 87% of every stride's energy.</p>
         </article>
-        <article class="card reveal" data-tilt data-cursor>
-          <span class="card__index">02</span>
-          <div class="card__icon card__icon--magenta" aria-hidden="true">
-            <svg viewBox="0 0 48 48"><path d="M8 34c6-14 26-20 32-20"/><path d="M8 26c6-8 18-12 26-12"/><circle cx="40" cy="14" r="3"/></svg>
-          </div>
-          <h3>Featherweight Knit</h3>
-          <p>One-piece matte knit locks the midfoot without seams, hot spots, or extra grams.</p>
+        <article class="feature fade-in" data-tilt>
+          <span class="feature__index">02</span>
+          <svg class="feature__icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M6 34c8-14 24-20 36-20"/><path d="M6 26c8-8 18-12 30-12"/><path d="M6 18c6-4 12-6 20-6"/></svg>
+          <h3>Engineered Knit</h3>
+          <p>A one-piece knit upper, mapped for breathability. No seams, no hot spots, no wasted grams.</p>
         </article>
-        <article class="card reveal" data-tilt data-cursor>
-          <span class="card__index">03</span>
-          <div class="card__icon card__icon--cyan" aria-hidden="true">
-            <svg viewBox="0 0 48 48"><path d="M6 36h36"/><path d="M10 36l6-10 6 6 8-14 8 18"/></svg>
-          </div>
-          <h3>Wet-Grip Outsole</h3>
-          <p>Hex-cut rubber built for slick, neon-lit streets. Traction that holds after midnight.</p>
+        <article class="feature fade-in" data-tilt>
+          <span class="feature__index">03</span>
+          <svg class="feature__icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M6 36h36"/><path d="M10 36l6-10 6 6 8-14 8 18"/></svg>
+          <h3>Grip Outsole</h3>
+          <p>Hex-cut rubber that holds on wet city streets, long after the lights come on.</p>
         </article>
       </div>
     </section>
 
-    <!-- ───────────── Closing CTA ───────────── -->
-    <section class="closing">
-      <h2 class="closing__title reveal">Own the <span class="neon">night.</span></h2>
-      <a href="#preorder" class="cta magnetic reveal" data-cursor="lg"><span class="cta__label">Pre-order — $<span data-bind="price">220</span></span><span class="cta__glow" aria-hidden="true"></span></a>
+    <!-- ───────────── Reviews ───────────── -->
+    <section class="reviews section" id="reviews" aria-labelledby="reviewsTitle">
+      <header class="section__head section__head--row">
+        <h2 class="display display--sm" id="reviewsTitle"><span class="line"><span>Early <em>miles.</em></span></span></h2>
+        <p class="reviews__score fade-in"><strong>4.9</strong> / 5 · 1,284 wear-tests</p>
+      </header>
+      <ul class="reviews__strip" role="list">
+        <li class="review fade-in">
+          <blockquote><p>“It feels like there's nothing under me until I push off — then the Air Core just answers.”</p></blockquote>
+          <p class="review__by">Maya R. · Marathoner, Berlin</p>
+        </li>
+        <li class="review fade-in">
+          <blockquote><p>“The quietest-looking shoe I own. People still ask about it on every night run.”</p></blockquote>
+          <p class="review__by">Daniel O. · Run club lead, Lagos</p>
+        </li>
+        <li class="review fade-in">
+          <blockquote><p>“240 grams is not a marketing number. I weighed it.”</p></blockquote>
+          <p class="review__by">Kenji T. · Gear editor, Tokyo</p>
+        </li>
+        <li class="review fade-in">
+          <blockquote><p>“Wet tarmac, cobbles, metro stairs. The outsole never flinched.”</p></blockquote>
+          <p class="review__by">Inès L. · Commuter, Paris</p>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ───────────── Newsletter ───────────── -->
+    <section class="newsletter section" aria-labelledby="newsTitle">
+      <h2 class="display display--sm" id="newsTitle"><span class="line"><span>First to the <em>next drop.</em></span></span></h2>
+      <form class="newsletter__form fade-in" id="newsletter" novalidate>
+        <label class="visually-hidden" for="email">Email address</label>
+        <input id="email" name="email" type="email" autocomplete="email" placeholder="Email address" required />
+        <button class="btn btn--solid" type="submit">Notify me</button>
+        <p class="newsletter__msg" id="newsMsg" role="status" aria-live="polite"></p>
+      </form>
     </section>
   </main>
 
   <footer class="footer">
-    <div class="footer__brand" data-bind="brand">NOCTIS</div>
-    <div class="footer__cols">
-      <div><p class="label">Shop</p><a href="#preorder" data-cursor>Pre-order</a><a href="#details" data-cursor>Sizing</a><a href="#features" data-cursor>Technology</a></div>
-      <div><p class="label">Support</p><a href="#" data-cursor>Shipping</a><a href="#" data-cursor>Returns</a><a href="#" data-cursor>Contact</a></div>
-      <div><p class="label">Follow</p><a href="#" data-cursor>Instagram</a><a href="#" data-cursor>TikTok</a><a href="#" data-cursor>YouTube</a></div>
+    <div class="footer__top">
+      <p class="footer__brand" data-bind="brand" aria-hidden="true">NOCTIS</p>
+      <nav class="footer__cols" aria-label="Footer">
+        <div><p class="eyebrow">Shop</p><a href="#preorder">Pre-order</a><a href="#specs">Sizing</a><a href="#technology">Technology</a></div>
+        <div><p class="eyebrow">Support</p><a href="#">Shipping</a><a href="#">Returns</a><a href="#">Contact</a></div>
+        <div><p class="eyebrow">Follow</p><a href="#">Instagram</a><a href="#">TikTok</a><a href="#">YouTube</a></div>
+      </nav>
     </div>
     <div class="footer__base">
       <span>© <span id="year">2026</span> <span data-bind="brand">NOCTIS</span>. All rights reserved.</span>
-      <span>Engineered from darkness.</span>
+      <span>Built in layers. Worn as one.</span>
     </div>
   </footer>
 
-  <!-- GSAP + ScrollTrigger (cdnjs), Lenis (unpkg) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
-  <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js" defer></script>
-  <script src="main.js" defer></script>
+  <script type="module" src="/src/main.js"></script>
 </body>
 </html>

@@ -1,0 +1,34 @@
+{
+  "videos": {
+    "video-1": {
+      "count": 192,
+      "aspect": 1.7777777777777777,
+      "variants": {
+        "desktop": {
+          "path": "/frames/video-1/desktop/",
+          "width": 1920
+        },
+        "mobile": {
+          "path": "/frames/video-1/mobile/",
+          "width": 960
+        }
+      }
+    },
+    "video-2": {
+      "count": 192,
+      "aspect": 1.7777777777777777,
+      "variants": {
+        "desktop": {
+          "path": "/frames/video-2/desktop/",
+          "width": 1920
+        },
+        "mobile": {
+          "path": "/frames/video-2/mobile/",
+          "width": 960
+        }
+      }
+    }
+  },
+  "pattern": "frame_{0000}.webp",
+  "version": "mupdsjaq"
+}
