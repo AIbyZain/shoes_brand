@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>NOCTIS — Phantom Air</title>
+  <meta name="description" content="Phantom Air. A matte black runner with a visible air-cushion core. Engineered from darkness." />
+  <meta name="theme-color" content="#050505" />
+
+  <!-- Fonts: Anton (display) + Inter (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Warm up the first frame so the canvas paints immediately -->
+  <link rel="preload" as="image" href="frames/v1/frame_0001.webp" media="(min-width: 769px)" />
+  <link rel="preload" as="image" href="frames/mobile/v1/frame_0001.webp" media="(max-width: 768px)" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="is-loading">
+
+  <!-- ───────────── Loader ───────────── -->
+  <div class="loader" id="loader" aria-live="polite">
+    <div class="loader__inner">
+      <span class="loader__brand" data-bind="brand">NOCTIS</span>
+      <span class="loader__bar"><span class="loader__fill" id="loaderFill"></span></span>
+      <span class="loader__pct"><span id="loaderPct">0</span>%</span>
+    </div>
+  </div>
+
+  <!-- ───────────── Chrome: cursor, progress, nav, chapters ───────────── -->
+  <div class="cursor" id="cursor" aria-hidden="true"><span class="cursor__dot"></span></div>
+  <div class="progress" aria-hidden="true"><span class="progress__fill" id="progressFill"></span></div>
+
+  <header class="nav">
+    <a href="#top" class="nav__logo" data-bind="brand" data-cursor>NOCTIS</a>
+    <nav class="nav__links">
+      <a href="#details" data-cursor>Details</a>
+      <a href="#features" data-cursor>Technology</a>
+      <a href="#preorder" class="nav__cta" data-cursor>Pre-order</a>
+    </nav>
+  </header>
+
+  <ol class="chapters" id="chapters" aria-hidden="true">
+    <li class="chapters__item is-active" data-chapter="1"><span>01</span> Origin</li>
+    <li class="chapters__item" data-chapter="2"><span>02</span> Impact</li>
+  </ol>
+
+  <main id="top">
+
+    <!-- ───────────── Scroll sequence (pinned) ─────────────
+         JS pins .stage and drives the canvas + overlays from one scrubbed timeline.
+         data-static-frame is used only in prefers-reduced-motion mode. -->
+    <section class="sequence" id="sequence">
+      <div class="stage" id="stage">
+        <canvas class="stage__canvas" id="canvas" aria-label="Phantom Air product film" role="img"></canvas>
+        <div class="stage__vignette"></div>
+        <div class="stage__tint" id="tint"></div>
+        <div class="stage__flash" id="flash"></div>
+
+        <!-- Pointer line toward the air-bubble sole (endpoint is projected from image space) -->
+        <svg class="sole-line" id="soleLine" aria-hidden="true">
+          <line id="soleLinePath" x1="0" y1="0" x2="0" y2="0" />
+          <circle id="soleLineDot" r="4" cx="0" cy="0" />
+          <circle id="soleLineRing" r="14" cx="0" cy="0" />
+        </svg>
+
+        <!-- V1 · 0–15% -->
+        <div class="overlay overlay--hero" data-overlay="hero" data-static-frame="1:1">
+          <div class="tilt">
+            <p class="label">Chapter 01 — Origin</p>
+            <h1 class="hero__title" data-bind="product">PHANTOM AIR</h1>
+            <p class="hero__tagline">Engineered from darkness.</p>
+            <p class="hero__hint"><span class="hero__hint-line"></span>Scroll to reveal</p>
+          </div>
+        </div>
+
+        <!-- V1 · 35–55% (sole close-up) -->
+        <div class="overlay overlay--sole" data-overlay="sole" data-static-frame="1:100">
+          <div class="tilt">
+            <p class="label">01.2 / Cushioning</p>
+            <h2 class="display">Air Cushion Core</h2>
+            <p class="spec">Pressurised 360° air unit returns <strong>87%</strong> of every stride's energy — soft on landing, explosive on toe-off.</p>
+          </div>
+        </div>
+
+        <!-- V1 · 70–90% -->
+        <div class="overlay overlay--weight" data-overlay="weight" data-static-frame="1:170">
+          <div class="tilt">
+            <p class="label">01.3 / Mass</p>
+            <h2 class="display display--xl">Weightless.<br /><span class="counter"><span id="weightCounter">240</span>g</span></h2>
+            <p class="spec">Men's US 9. Knit upper, carbon-infused heel clip.</p>
+          </div>
+        </div>
+
+        <!-- V2 · 10–25% (stomp) -->
+        <div class="overlay overlay--impact" data-overlay="impact" data-static-frame="2:44">
+          <div class="tilt">
+            <h2 class="impact" id="impactWord">IMPACT</h2>
+          </div>
+        </div>
+
+        <!-- V2 · 40–65% (neon city) -->
+        <div class="overlay overlay--city" data-overlay="city" data-static-frame="2:110">
+          <div class="tilt">
+            <p class="label">Chapter 02 — Impact</p>
+            <h2 class="display neon">Built for the city<br />that never sleeps.</h2>
+          </div>
+        </div>
+
+        <!-- V2 · 80–100% (finale + pre-order) -->
+        <div class="overlay overlay--finale" data-overlay="finale" data-static-frame="2:150" id="preorder">
+          <div class="tilt">
+            <p class="label">Drop 001 — Limited run</p>
+            <h2 class="display" data-bind="product">PHANTOM AIR</h2>
+            <p class="price"><span class="price__currency">$</span><span data-bind="price">220</span></p>
+
+            <div class="swatches" role="radiogroup" aria-label="Colorway">
+              <!-- Colorways come from CONFIG.colorways; JS renders the buttons -->
+            </div>
+            <p class="swatch-name" id="swatchName">Obsidian</p>
+
+            <a href="#details" class="cta magnetic" data-cursor="lg" id="cta">
+              <span class="cta__label">Pre-order now</span>
+              <span class="cta__glow" aria-hidden="true"></span>
+            </a>
+            <p class="ships">Ships 11.24 · Free returns</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────── Product details ───────────── -->
+    <section class="details" id="details">
+      <div class="details__media reveal">
+        <img src="frames/v1/frame_0110.webp" alt="Phantom Air side profile showing the visible air-cushion sole" loading="lazy" width="1920" height="1080" />
+        <span class="details__badge">Air Cushion Core — 360°</span>
+      </div>
+      <div class="details__copy">
+        <p class="label reveal">Product details</p>
+        <h2 class="display reveal"><span data-bind="product">PHANTOM AIR</span></h2>
+        <p class="lede reveal">A single piece of engineered darkness. Matte knit upper, sculpted TPU cage, and a fully exposed air unit that does the talking.</p>
+        <dl class="specs reveal">
+          <div><dt>Weight</dt><dd>240 g</dd></div>
+          <div><dt>Drop</dt><dd>10 mm</dd></div>
+          <div><dt>Stack</dt><dd>38 / 28 mm</dd></div>
+          <div><dt>Upper</dt><dd>Recycled matte knit</dd></div>
+          <div><dt>Midsole</dt><dd>Visible 360° air unit</dd></div>
+          <div><dt>Outsole</dt><dd>Wet-grip rubber</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- ───────────── Feature grid ───────────── -->
+    <section class="features" id="features">
+      <header class="features__head">
+        <p class="label reveal">Technology</p>
+        <h2 class="display reveal">Three things you'll feel first.</h2>
+      </header>
+      <div class="features__grid">
+        <article class="card reveal" data-tilt data-cursor>
+          <span class="card__index">01</span>
+          <div class="card__icon card__icon--cyan" aria-hidden="true">
+            <svg viewBox="0 0 48 48"><ellipse cx="24" cy="30" rx="18" ry="8"/><ellipse cx="24" cy="30" rx="10" ry="4"/><path d="M6 30V22c0-4 8-8 18-8s18 4 18 8v8"/></svg>
+          </div>
+          <h3>Air Cushion Core</h3>
+          <p>A pressurised, fully visible air unit spans heel to toe for 87% energy return.</p>
+        </article>
+        <article class="card reveal" data-tilt data-cursor>
+          <span class="card__index">02</span>
+          <div class="card__icon card__icon--magenta" aria-hidden="true">
+            <svg viewBox="0 0 48 48"><path d="M8 34c6-14 26-20 32-20"/><path d="M8 26c6-8 18-12 26-12"/><circle cx="40" cy="14" r="3"/></svg>
+          </div>
+          <h3>Featherweight Knit</h3>
+          <p>One-piece matte knit locks the midfoot without seams, hot spots, or extra grams.</p>
+        </article>
+        <article class="card reveal" data-tilt data-cursor>
+          <span class="card__index">03</span>
+          <div class="card__icon card__icon--cyan" aria-hidden="true">
+            <svg viewBox="0 0 48 48"><path d="M6 36h36"/><path d="M10 36l6-10 6 6 8-14 8 18"/></svg>
+          </div>
+          <h3>Wet-Grip Outsole</h3>
+          <p>Hex-cut rubber built for slick, neon-lit streets. Traction that holds after midnight.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ───────────── Closing CTA ───────────── -->
+    <section class="closing">
+      <h2 class="closing__title reveal">Own the <span class="neon">night.</span></h2>
+      <a href="#preorder" class="cta magnetic reveal" data-cursor="lg"><span class="cta__label">Pre-order — $<span data-bind="price">220</span></span><span class="cta__glow" aria-hidden="true"></span></a>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__brand" data-bind="brand">NOCTIS</div>
+    <div class="footer__cols">
+      <div><p class="label">Shop</p><a href="#preorder" data-cursor>Pre-order</a><a href="#details" data-cursor>Sizing</a><a href="#features" data-cursor>Technology</a></div>
+      <div><p class="label">Support</p><a href="#" data-cursor>Shipping</a><a href="#" data-cursor>Returns</a><a href="#" data-cursor>Contact</a></div>
+      <div><p class="label">Follow</p><a href="#" data-cursor>Instagram</a><a href="#" data-cursor>TikTok</a><a href="#" data-cursor>YouTube</a></div>
+    </div>
+    <div class="footer__base">
+      <span>© <span id="year">2026</span> <span data-bind="brand">NOCTIS</span>. All rights reserved.</span>
+      <span>Engineered from darkness.</span>
+    </div>
+  </footer>
+
+  <!-- GSAP + ScrollTrigger (cdnjs), Lenis (unpkg) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+  <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js" defer></script>
+  <script src="main.js" defer></script>
+</body>
+</html>
